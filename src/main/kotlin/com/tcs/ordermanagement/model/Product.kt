@@ -6,7 +6,6 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
 @Entity
-@NamedQuery(name="Product.updateQuantity", query="update Product p SET p.qty= :newQty WHERE p.product_id = :id")
 data class Product (
     @Id
     val product_id: Int,
@@ -27,5 +26,10 @@ data class Product (
     val valid_To: LocalDate,
 
     @NotNull
-    val qty: Int
+    val qty: Int,
+
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name="product_id")
+    //@OneToMany(mappedBy = "productId")
+    val productPrice: ProductPrice
 )

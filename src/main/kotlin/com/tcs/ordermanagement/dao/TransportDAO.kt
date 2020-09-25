@@ -13,5 +13,5 @@ class TransportDAO (val transportRepository: TransportRepository){
         transportRepository.save(transport)
 
     fun getTransportByOrder(id: Int)=
-        transportRepository.getTransportByOrder(id)
+        transportRepository.getTransportByOrderId(id)
 }

@@ -7,13 +7,13 @@ import javax.validation.constraints.NotNull
 
 @Entity
 @Table(name = "product_price")
-@NamedQuery(name="ProductPrice.findAmtByProductId",query="SELECT p.amount FROM ProductPrice p WHERE p.product_id = :id")
 data class ProductPrice (
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Int,
 
-    val product_id:Int,
+    @Column(name="product_id")
+    val productId:Int,
 
     @NotNull
     val amount: Double,
