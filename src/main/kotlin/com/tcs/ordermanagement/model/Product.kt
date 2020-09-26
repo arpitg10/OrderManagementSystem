@@ -29,7 +29,7 @@ data class Product (
     val qty: Int,
 
     @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name="product_id")
+    @JoinColumn(name="product_id",referencedColumnName = "product_id")
     //@OneToMany(mappedBy = "productId")
     val productPrice: ProductPrice
 )

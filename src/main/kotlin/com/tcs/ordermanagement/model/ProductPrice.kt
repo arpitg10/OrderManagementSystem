@@ -25,5 +25,8 @@ data class ProductPrice (
     var valid_from: Date,
 
     @NotNull
-    var valid_to: Date
+    var valid_to: Date,
+
+    @OneToOne(mappedBy = "productPrice")
+    val product: Product
 )

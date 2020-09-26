@@ -19,6 +19,20 @@ class OrderService(val dao: ProductDAO, val daoOrder: OrderDAO, val daoTransport
 
     val logger: Logger =LoggerFactory.getLogger("service logs")
 
+    companion object{
+        fun productStatus(id: Int,qty: Int, product: Product): String{
+            if(product==null)
+                return "No Product found with id $id"
+            else if (product.qty<qty)
+                return "Product ${product.name} with ID ${product.product_id} doesn't have sufficient quantity"
+            else if (!(product.valid_To.isAfter(LocalDate.now()) && product.valid_From.isBefore(LocalDate.now())))
+                return "Product ${product.name} with ID ${product.product_id} doesn't have validity"
+            else return "available"
+        }
+
+        fun calInstance()=Calendar.getInstance()
+    }
+
     //Product Functions
 
     fun addProduct(prod: Product)=
@@ -29,43 +43,33 @@ class OrderService(val dao: ProductDAO, val daoOrder: OrderDAO, val daoTransport
 
     fun getProduct(id: Int,qty: Int): String{
         val daoResponse=dao.getProduct(id).orElse(null)
-        if(daoResponse==null)
-            return "No Product found with id $id"
-        else if (daoResponse.qty<qty)
-            return "Product ${daoResponse.name} with ID ${daoResponse.product_id} doesn't have sufficient quantity"
-        else if (daoResponse.valid_To.isAfter(LocalDate.now()) && daoResponse.valid_From.isBefore(LocalDate.now()))
+        val res= productStatus(id,qty,daoResponse)
+        if(res.equals("available"))
             return daoResponse.toString()
-        else return "Product ${daoResponse.name} with ID ${daoResponse.product_id} doesn't have validity"
+        else return res
     }
 
     fun getTotalPrice(id: Int,qty: Int): String{
         val daoResponse=dao.getProduct(id).orElse(null)
-        if(daoResponse==null)
-            return "No Product found with id $id"
-        else if (daoResponse.qty<qty)
-            return "Product ${daoResponse.name} with ID ${daoResponse.product_id} doesn't have sufficient quantity"
-        else if (!(daoResponse.valid_To.isAfter(LocalDate.now()) && daoResponse.valid_From.isBefore(LocalDate.now())))
-            return "Product ${daoResponse.name} with ID ${daoResponse.product_id} doesn't have validity"
-        else return "The total amount of ${daoResponse.name} is ${(dao.getPrice(id).amount*qty)}"
+        val res= productStatus(id,qty,daoResponse)
+        if(res.equals("available"))
+            return "The total amount of ${daoResponse.name} is ${(dao.getPrice(id).amount*qty)}"
+        else return res
     }
     //Order Functions
 
     fun newOrder(id: Int,qty: Int): String{
         val daoResponse=dao.getProduct(id).orElse(null)
-        if(daoResponse==null)
-            return "No Product found with id $id"
-        else if (daoResponse.qty<qty)
-            return "Product ${daoResponse.name} with ID ${daoResponse.product_id} doesn't have sufficient quantity"
-        else if (!(daoResponse.valid_To.isAfter(LocalDate.now()) && daoResponse.valid_From.isBefore(LocalDate.now())))
-            return "Product ${daoResponse.name} with ID ${daoResponse.product_id} doesn't have validity"
-        else{
+        val res= productStatus(id,qty,daoResponse)
+        if(res.equals("available")){
             val orderResponse= daoOrder.newOrder(Order(0,id, dao.getPrice(id).amount*qty))
             dao.updateQuantity(id,daoResponse.qty-qty)
-            val c=Calendar.getInstance()
+            val c= calInstance()
             c.add(Calendar.DATE,10)
             daoTransport.addTransport(Transport(0,orderResponse.order_id,1,"Ready To Ship",Date(),c.time))
             return orderResponse.toString()
         }
+        else return res
     }
 
     fun getOrder(id: Int)=
